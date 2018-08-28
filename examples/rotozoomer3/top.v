@@ -18,7 +18,6 @@
 `include "../../hdl/core.vh"
 `include "sine_table.vh"
 `include "cosine_table.vh"
-`include "bitmap_rom.vh"
 
 // look in pins.pcf for all the pin names on the TinyFPGA BX board
 module top (
@@ -77,12 +76,10 @@ module top (
     // zoom factor also oscillates in a sine wave motion
     sine_table sine_scale(.clk(pixel_clock), .idx(angle[8:1]), .val(scale));
 
-    reg [3:0] rom_rgb;
-    bitmap_rom image(.clk(pixel_clock), .y_idx(~v[16:12]), .x_idx(u[16:12]), .val(rom_rgb));
+    // get the bit texture image from memory.
+    reg pixel;
+    image image (.clk(pixel_clock), .x_img(u), .y_img(v), .pixel(pixel));
 
-    assign vga_red = rom_rgb[0] && video_active;
-    assign vga_green = rom_rgb[1] && video_active;
-    assign vga_blue = rom_rgb[2] && video_active;
 
     reg prev_vsync;
 
@@ -107,9 +104,17 @@ module top (
           u <= u_start;
           v <= v_start;
         end else begin
-          u <= u + u_stride[16:0];
-          v <= v + v_stride[16:0];
+          u = u + u_stride[16:0];
+          v = v + v_stride[16:0];
+          if (pixel)
+            vga_green <= 1'b1;
+          else
+            vga_green <= 1'b0;
         end
+      end else begin
+        vga_blue  <= 1'b0;
+        vga_green <= 1'b0;
+        vga_red   <= 1'b0;
       end
     end
 
