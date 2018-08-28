@@ -78,8 +78,7 @@ module top (
 
     // get the bit texture image from memory.
     reg pixel;
-    image image (.clk(pixel_clock), .x_img(u), .y_img(v), .pixel(pixel));
-
+    image image (.clk(pixel_clock), .x_img(~u[16:10]), .y_img(v[16:10]), .pixel(pixel));
 
     reg prev_vsync;
 
@@ -104,8 +103,8 @@ module top (
           u <= u_start;
           v <= v_start;
         end else begin
-          u = u + u_stride[16:0];
-          v = v + v_stride[16:0];
+          u <= u + u_stride[16:0];
+          v <= v + v_stride[16:0];
           if (pixel)
             vga_green <= 1'b1;
           else
