@@ -89,6 +89,6 @@ In this example we use a texture from **image.v** module with a logo of [_"FPGAw
 
 In this example you can change the "angle" and "scale" with buttons conected from PIN_24 to PIN_21.
 
-![TinyFPGA-BX](https://raw.githubusercontent.com/juanmard/master/examples/rotozoomer4/doc/TinyFPGA-BX.jpg)
+![TinyFPGA-BX](https://raw.githubusercontent.com/juanmard/tinyfpga-bx-demos/develop/examples/rotozoomer4/doc/TinyFPGA-BX.jpg)
 
 Easy! :)
