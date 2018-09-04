@@ -54,8 +54,8 @@ module top (
     reg[9:0] ypos;
     wire video_active;
 
-    reg [8:0] angle = 0;                 /* angle that image is rotated (0..255) */
-    signed reg [15:0] scale = 16'h8001;         /* scale to draw at */
+    reg [8:0] angle = 0;                        /* angle that image is rotated (0..255) */
+    signed reg [15:0] scale = {2'b01,14'h0};    /* scale to draw at */
 
     localparam ROTATE_CENTRE_X = 320;
     localparam ROTATE_CENTRE_Y = 240;
@@ -80,12 +80,12 @@ module top (
 
     VGASyncGen vga_generator(.clk(CLK), .hsync(vga_hsync), .vsync(vga_vsync), .x_px(xpos), .y_px(ypos), .activevideo(video_active), .px_clk(pixel_clock));
 
-    sine_table y_angle_table(.clk(pixel_clock), .idx(angle[7:0]), .val(unscaled_v_stride));
     cosine_table x_angle_table(.clk(pixel_clock), .idx(angle[7:0]), .val(unscaled_u_stride));
+    sine_table y_angle_table(.clk(pixel_clock), .idx(angle[7:0]), .val(unscaled_v_stride));
 
     // get the bit texture image from memory.
     reg pixel;
-    image image (.clk(pixel_clock), .x_img({3'b0,~u[16:10]}), .y_img({3'b0,v[16:10]}), .pixel(pixel));
+    image image (.clk(pixel_clock), .x_img({3'b0,u[16:10]}), .y_img({3'b0,v[16:10]}), .pixel(pixel));
 
     reg prev_vsync;
 
@@ -99,17 +99,17 @@ module top (
         if (dec_angle) angle <= angle - 1;
         if (inc_zoom) scale <= scale + 50;
         if (dec_zoom) scale <= scale - 50;
-        u_stride <= (scale * unscaled_u_stride) >>> (16+5);
-        v_stride <= (scale * unscaled_v_stride) >>> (16+5);  // 16 to account for scale, 5 to make textures bigger
-        u_offset <= (ROTATE_CENTRE_X * unscaled_u_stride) >>> (16+5);
-        v_offset <= (ROTATE_CENTRE_Y * unscaled_v_stride) >>> (16+5);
-        u_start <= -u_offset[16:0];
+        u_stride <= (scale * unscaled_u_stride) >>> (16+3);
+        v_stride <= (scale * unscaled_v_stride) >>> (16+3);  // 16 to account for scale, 3 to make textures bigger
+        u_offset <= 0; //(ROTATE_CENTRE_X * unscaled_u_stride) >>> (16+3);
+        v_offset <= 0; //(ROTATE_CENTRE_Y * unscaled_v_stride) >>> (16+3);
+        u_start <= u_offset[16:0];
         v_start <= v_offset[16:0];
       end
       if (video_active) begin
         if (xpos == 0) begin
-          u_start <= u_start + v_stride[16:0];
-          v_start <= v_start - u_stride[16:0];
+          u_start <= u_start - v_stride[16:0];
+          v_start <= v_start + u_stride[16:0];
           u <= u_start;
           v <= v_start;
         end else begin
