@@ -1,7 +1,7 @@
 `ifndef __MAP_ROM__
 `define __MAP_ROM__
 
-module texture_rom(
+module map_rom(
   input clk,
   input [5:0] y_idx,
   input [5:0] x_idx,
